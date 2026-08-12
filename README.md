@@ -69,59 +69,6 @@ routes/
 
 ---
 
-## 🚀 Setup & Installation
-
-### 1. Clone the repository & install dependencies
-```bash
-composer install
-npm install
-```
-
-### 2. Configure Environment Variables
-Copy `.env.example` to `.env` (or update your existing `.env` file):
-
-```env
-APP_NAME=GameVault
-APP_URL=http://localhost:8000
-
-# PostgreSQL Connection (Supabase)
-DB_CONNECTION=pgsql
-DB_HOST=db.xxxxxxxxxxxx.supabase.co
-DB_PORT=5432
-DB_DATABASE=postgres
-DB_USERNAME=postgres
-DB_PASSWORD=your-supabase-db-password
-
-# Supabase Auth Credentials
-SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
-SUPABASE_KEY=your-anon-public-key
-```
-
-### 3. Generate App Key & Link Storage
-```bash
-php artisan key:generate
-php artisan storage:link
-```
-
-### 4. Run Database Migrations
-Run migrations to create the `games` table in your Supabase database:
-```bash
-php artisan migrate
-```
-
-### 5. Start Development Servers
-```bash
-# Terminal 1: Run Laravel server
-php artisan serve
-
-# Terminal 2: Run Vite dev server
-npm run dev
-```
-
-Visit `http://localhost:8000` in your browser.
-
----
-
 ## 🎓 Key Academic & Assignment Concepts
 
 This project clearly demonstrates core Laravel and Web Development concepts:
