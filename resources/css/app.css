@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+@plugin "daisyui" {
+    themes: dark --default, light;
+}
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* GameVault custom color tokens */
+    --color-vault-dark: #0f0f1a;
+    --color-vault-card: #1a1a2e;
+    --color-vault-sidebar: #12121f;
+    --color-vault-border: #2a2a3e;
+    --color-vault-accent: #7c3aed;
+    --color-vault-accent-hover: #6d28d9;
+    --color-vault-text: #e2e8f0;
+    --color-vault-muted: #94a3b8;
+}
+
+/* Custom scrollbar for the gaming aesthetic */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-vault-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-vault-border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-vault-accent);
+}

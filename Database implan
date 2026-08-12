@@ -1,0 +1,387 @@
+# GameVault — Game Library CRUD + Supabase Auth
+
+Build a complete game collection manager on the existing Laravel 13 project. Users authenticate via Supabase, and each user manages their own private game collection. The database starts empty — no seeds, no fakes.
+
+## Repository Assessment
+
+| Property | Current Value |
+|---|---|
+| **Laravel** | 13.17 (PHP 8.3+) |
+| **Frontend** | Tailwind CSS **v4** via `@tailwindcss/vite`, Vite 8 |
+| **Database** | SQLite (default in `.env`) |
+| **Existing models** | `User` only |
+| **Existing controllers** | Base `Controller` (empty) |
+| **Existing views** | `welcome.blade.php` only |
+| **Existing routes** | `/` → welcome view |
+| **Existing migrations** | users, cache, jobs (Laravel defaults) |
+
+> [!IMPORTANT]
+> **Tailwind CSS v4 + DaisyUI.** DaisyUI **v5** is required for Tailwind v4 compatibility. Will be installed via `npm install -D daisyui@latest`.
+
+> [!IMPORTANT]
+> **Database stays as SQLite.** The game data is stored locally in SQLite. Only authentication uses Supabase. This means no MySQL server is needed.
+
+---
+
+## Supabase Setup (You Need To Do This)
+
+Before the app can run, you need a free Supabase project:
+
+### Step 1: Create a Supabase Project
+1. Go to [supabase.com](https://supabase.com) and sign up / log in
+2. Click **"New Project"**
+3. Give it a name (e.g., `gamevault`)
+4. Set a database password (you won't need this directly)
+5. Choose a region close to you
+6. Click **"Create new project"** and wait for it to finish
+
+### Step 2: Get Your API Credentials
+1. In your Supabase dashboard, go to **Settings → API**
+2. Copy these two values:
+   - **Project URL** — looks like `https://xxxxxxxxxxxx.supabase.co`
+   - **anon public key** — a long JWT string starting with `eyJ...`
+
+### Step 3: Add to `.env`
+```env
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_KEY=your-anon-public-key-here
+```
+
+### Step 4: Enable Email Auth (should be on by default)
+1. Go to **Authentication → Providers** in your Supabase dashboard
+2. Confirm **Email** provider is enabled
+3. **Disable "Confirm email"** for easier testing (Authentication → Settings → uncheck "Enable email confirmations")
+
+> [!TIP]
+> Disabling email confirmations means users can log in immediately after registering — much easier for a class demonstration.
+
+---
+
+## Authentication Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    Laravel App                       │
+│                                                      │
+│  Blade Form ──▶ AuthController ──▶ SupabaseService  │
+│                       │                   │          │
+│                       │          HTTP calls to       │
+│                       │         Supabase Auth API    │
+│                       ▼                              │
+│              Laravel Session                         │
+│         (stores user info + token)                   │
+│                       │                              │
+│                       ▼                              │
+│            SupabaseAuth Middleware                    │
+│          (protects /games routes)                    │
+└─────────────────────────────────────────────────────┘
+```
+
+**How it works:**
+1. User fills login/register **Blade forms** (no JavaScript needed)
+2. `AuthController` receives the form POST and calls `SupabaseService`
+3. `SupabaseService` makes HTTP requests to Supabase Auth REST API:
+   - `POST /auth/v1/signup` — register
+   - `POST /auth/v1/token?grant_type=password` — login
+   - `POST /auth/v1/logout` — logout
+4. On success, the Supabase user ID + email + access token are stored in **Laravel's session**
+5. `SupabaseAuth` middleware checks the session on every protected route
+6. Games are scoped to the authenticated user via `user_id` column
+
+---
+
+## Proposed Changes
+
+### Database Layer
+
+#### [NEW] [create_games_table.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/database/migrations/2026_08_12_000000_create_games_table.php)
+
+> [!IMPORTANT]
+> **Updated from original plan** — now includes a `user_id` column (string, to store the Supabase UUID) so each user has their own game collection.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `bigIncrements` | Primary key |
+| `user_id` | `string` | Supabase user UUID — indexes games per user |
+| `title` | `string(255)` | Required |
+| `description` | `text`, nullable | |
+| `genre` | `string(100)` | Required |
+| `platform` | `string(100)` | Required |
+| `developer` | `string(255)` | Required |
+| `release_date` | `date` | Required |
+| `price` | `decimal(8,2)`, nullable | |
+| `status` | `string(50)` | Playing, Completed, Backlog, Dropped |
+| `cover_image` | `string(255)`, nullable | File path |
+| `timestamps` | | `created_at` / `updated_at` |
+
+---
+
+### Supabase Service
+
+#### [NEW] [SupabaseService.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Services/SupabaseService.php)
+
+A clean service class that wraps Supabase Auth REST API calls using Laravel's HTTP client:
+
+```php
+class SupabaseService
+{
+    public function signUp(string $email, string $password): array     // Register
+    public function signIn(string $email, string $password): array     // Login
+    public function signOut(string $accessToken): void                 // Logout
+    public function getUser(string $accessToken): ?array               // Verify token
+}
+```
+
+Each method uses `Http::withHeaders(...)` to call Supabase endpoints. Returns the parsed JSON response or throws on error.
+
+---
+
+### Auth Middleware
+
+#### [NEW] [SupabaseAuth.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Http/Middleware/SupabaseAuth.php)
+
+Custom middleware that:
+1. Checks if `supabase_user` exists in the session
+2. If not → redirects to `/login` with a flash message
+3. If yes → allows the request through, shares user data with all views via `View::share`
+
+Registered as `supabase.auth` in the app's middleware aliases.
+
+---
+
+### Auth Controller
+
+#### [NEW] [AuthController.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Http/Controllers/AuthController.php)
+
+| Method | Route | Purpose |
+|---|---|---|
+| `showLogin()` | `GET /login` | Show login Blade form |
+| `login()` | `POST /login` | Validate credentials, call `SupabaseService::signIn()`, store in session, redirect to `/games` |
+| `showRegister()` | `GET /register` | Show register Blade form |
+| `register()` | `POST /register` | Validate input, call `SupabaseService::signUp()`, auto-login, redirect to `/games` |
+| `logout()` | `POST /logout` | Call `SupabaseService::signOut()`, flush session, redirect to `/login` |
+
+Error handling: catches Supabase API errors (invalid credentials, email already exists, etc.) and returns them as flash messages to the Blade forms.
+
+---
+
+### Model
+
+#### [MODIFY] [Game.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Models/Game.php)
+
+Already created — will be updated to add `user_id` to `$fillable` array.
+
+---
+
+### Controller
+
+#### [NEW] [GameController.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Http/Controllers/GameController.php)
+
+Resource controller — same as original plan but with **user scoping**:
+
+| Method | Route | Key Difference |
+|---|---|---|
+| `index()` | `GET /games` | Queries `Game::where('user_id', session('supabase_user.id'))` |
+| `create()` | `GET /games/create` | No change |
+| `store()` | `POST /games` | Sets `user_id` from session before saving |
+| `show($game)` | `GET /games/{game}` | Verifies game belongs to logged-in user (403 if not) |
+| `edit($game)` | `GET /games/{game}/edit` | Same ownership check |
+| `update($game)` | `PUT /games/{game}` | Same ownership check |
+| `destroy($game)` | `DELETE /games/{game}` | Same ownership check |
+
+---
+
+### Form Requests
+
+#### [ALREADY CREATED] [StoreGameRequest.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Http/Requests/StoreGameRequest.php)
+#### [ALREADY CREATED] [UpdateGameRequest.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/app/Http/Requests/UpdateGameRequest.php)
+
+No changes needed — validation rules don't depend on auth.
+
+---
+
+### Routes
+
+#### [MODIFY] [web.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/routes/web.php)
+
+```php
+// Public routes (no auth needed)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Redirect root to games
+Route::get('/', fn() => redirect()->route('games.index'));
+
+// Protected routes (requires Supabase auth)
+Route::middleware('supabase.auth')->group(function () {
+    Route::resource('games', GameController::class);
+});
+```
+
+---
+
+### Frontend — CSS & Theme
+
+#### [MODIFY] [app.css](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/css/app.css)
+
+Add DaisyUI v5 plugin + configure a dark gaming theme with purple/indigo accents.
+
+---
+
+### Blade Views
+
+#### [NEW] [app.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/layouts/app.blade.php)
+
+Master layout with:
+- Dark sidebar with GameVault branding, nav links (Dashboard, Games, Add Game)
+- **User info in sidebar** — shows logged-in email + Logout button
+- Flash message alerts (success/error)
+- Responsive drawer for mobile
+
+#### [NEW] [login.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/auth/login.blade.php)
+
+Login page:
+- Centered card with GameVault branding
+- Email + Password fields
+- Login button
+- "Don't have an account? Register" link
+- Error messages for invalid credentials
+
+#### [NEW] [register.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/auth/register.blade.php)
+
+Register page:
+- Centered card with GameVault branding
+- Email + Password + Confirm Password fields
+- Register button
+- "Already have an account? Login" link
+- Error messages for validation / Supabase errors
+
+#### [NEW] [index.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/games/index.blade.php)
+
+Games listing — same as original plan (empty state, search, filters, game cards, pagination).
+
+#### [NEW] [create.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/games/create.blade.php)
+
+Add Game form — same as original plan.
+
+#### [NEW] [show.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/games/show.blade.php)
+
+Game detail — same as original plan.
+
+#### [NEW] [edit.blade.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/resources/views/games/edit.blade.php)
+
+Edit Game form — same as original plan.
+
+---
+
+### Configuration
+
+#### [MODIFY] [.env](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/.env)
+
+Add:
+```env
+APP_NAME=GameVault
+SUPABASE_URL=your-project-url
+SUPABASE_KEY=your-anon-key
+```
+
+#### [NEW] [supabase.php](file:///d:/PROJECTS%20RANIEL%20CODES/laravel-game-vault/config/supabase.php)
+
+Laravel config file that reads from `.env`:
+```php
+return [
+    'url' => env('SUPABASE_URL'),
+    'key' => env('SUPABASE_KEY'),
+];
+```
+
+---
+
+## Complete File Inventory
+
+| Action | File | Purpose |
+|---|---|---|
+| **NEW** | `config/supabase.php` | Supabase config |
+| **NEW** | `app/Services/SupabaseService.php` | Supabase Auth API wrapper |
+| **NEW** | `app/Http/Middleware/SupabaseAuth.php` | Auth middleware |
+| **NEW** | `app/Http/Controllers/AuthController.php` | Login/Register/Logout |
+| **NEW** | `app/Http/Controllers/GameController.php` | Game CRUD (7 methods) |
+| **MODIFY** | `database/migrations/..._create_games_table.php` | Add `user_id` column |
+| **MODIFY** | `app/Models/Game.php` | Add `user_id` to fillable |
+| **DONE** | `app/Http/Requests/StoreGameRequest.php` | Already created |
+| **DONE** | `app/Http/Requests/UpdateGameRequest.php` | Already created |
+| **NEW** | `resources/views/layouts/app.blade.php` | Master layout + sidebar |
+| **NEW** | `resources/views/auth/login.blade.php` | Login form |
+| **NEW** | `resources/views/auth/register.blade.php` | Register form |
+| **NEW** | `resources/views/games/index.blade.php` | Games listing |
+| **NEW** | `resources/views/games/create.blade.php` | Add Game form |
+| **NEW** | `resources/views/games/show.blade.php` | Game detail |
+| **NEW** | `resources/views/games/edit.blade.php` | Edit Game form |
+| **MODIFY** | `routes/web.php` | Auth routes + resource route |
+| **MODIFY** | `resources/css/app.css` | DaisyUI + theme |
+| **MODIFY** | `.env` | APP_NAME + Supabase creds |
+
+> [!NOTE]
+> No existing files will be deleted. The `welcome.blade.php` remains untouched.
+
+---
+
+## Laravel Concepts Demonstrated
+
+| # | Concept | Where |
+|---|---|---|
+| 1 | **Forms** | `create.blade.php`, `edit.blade.php`, `login.blade.php`, `register.blade.php` |
+| 2 | **Databases** | Migration, `.env` config, `games` table |
+| 3 | **Migrations** | `create_games_table.php` |
+| 4 | **Eloquent** | `Game.php` model — fillable, casts, scoped queries |
+| 5 | **HTTP Requests** | GET, POST, PUT, DELETE + Supabase HTTP client calls |
+| 6 | **REST** | `Route::resource()` — full RESTful routing |
+| 7 | **Controllers** | `GameController` (resource), `AuthController` |
+| 8 | **Request Validation** | `StoreGameRequest`, `UpdateGameRequest` |
+| 9 | **Form Request Classes** | Dedicated classes in `app/Http/Requests/` |
+| 10 | **DaisyUI** | Cards, buttons, badges, modals, drawer, inputs across all views |
+| **Bonus** | **Middleware** | Custom `SupabaseAuth` middleware |
+| **Bonus** | **Services** | `SupabaseService` — separation of concerns |
+| **Bonus** | **Sessions** | Storing auth state in Laravel sessions |
+
+---
+
+## Verification Plan
+
+### Commands to Run
+
+```bash
+# 1. Install DaisyUI (may already be running)
+npm install -D daisyui@latest
+
+# 2. Generate app key
+php artisan key:generate
+
+# 3. Run migrations
+php artisan migrate
+
+# 4. Create storage symlink
+php artisan storage:link
+
+# 5. Build assets
+npm run build
+
+# 6. Start servers
+php artisan serve
+npm run dev  # (separate terminal)
+```
+
+### Manual Verification
+
+1. Open `http://localhost:8000` → redirects to `/login`
+2. Click "Register" → create account → redirects to `/games`
+3. Games page shows "No games found" empty state
+4. Add a game → it appears in the list
+5. Log out → log back in → game is still there (your collection persists)
+6. Register a second account → that user sees an empty collection (separate per user)
+7. Test CRUD: create, view, edit, delete
+8. Test validation: submit empty form → inline errors
+9. Test wrong credentials: login with bad password → error message
