@@ -98,10 +98,10 @@
                     {{-- Brand --}}
                     <div class="p-6 border-b border-[--color-vault-border]">
                         <a href="{{ route('games.index') }}" class="flex items-center gap-3 group">
-                            <img src="{{ asset('Logo Icon.png') }}" alt="GameVault Logo" class="h-9 w-auto object-contain group-hover:scale-105 transition-transform" />
-                            <div>
-                                <h1 class="text-xl font-black tracking-wider text-white">GAMEVAULT</h1>
-                                <p class="text-[10px] font-mono tracking-widest text-[--color-vault-gold] uppercase">Vault Control v2.0</p>
+                            <img src="{{ asset('Logo Icon.png') }}" alt="GameVault Logo" class="h-8 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform" />
+                            <div class="min-w-0">
+                                <h1 class="text-lg font-black tracking-wider text-white truncate">GAMEVAULT</h1>
+                                <p class="text-[10px] font-mono tracking-widest text-[--color-vault-gold] uppercase truncate">Vault Control v2.0</p>
                             </div>
                         </a>
                     </div>
