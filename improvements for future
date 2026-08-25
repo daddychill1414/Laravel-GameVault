@@ -34,3 +34,10 @@
 📥 Vault Export (CSV / JSON)
 - A "Export Vault" button in settings/dashboard to download the entire personal collection for offline backups.
 
+🔒 3. Architecture & Laravel Conventions (Refactoring)
+🔗 Eloquent Relationships (Laracasts Episode 16)
+- Define `User hasMany(Game::class)` and `Game belongsTo(User::class)` Eloquent model relationships to replace raw manual query scoping.
+
+🛡️ Formal Laravel Policy & Gate Authorization (Laracasts Episodes 17 & 18)
+- Generate a dedicated `GamePolicy` (`app/Policies/GamePolicy.php`) class with `view`, `update`, and `delete` policy methods.
+- Refactor `GameController` authorization checks to use `$this->authorize('update', $game)` / `Gate::authorize()` methods.
