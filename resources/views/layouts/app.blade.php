@@ -17,7 +17,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-[--color-vault-dark] text-[--color-vault-text]">
+<body class="min-h-screen bg-[--color-vault-dark] bg-tech-grid text-[--color-vault-text] antialiased selection:bg-[--color-vault-accent] selection:text-white relative overflow-x-hidden">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
 
     {{-- DaisyUI Drawer: sidebar on desktop, hamburger on mobile --}}
     <div class="drawer lg:drawer-open">
@@ -29,7 +31,7 @@
         <div class="drawer-content flex flex-col min-h-screen">
 
             {{-- Top bar (mobile only) --}}
-            <div class="navbar bg-[--color-vault-sidebar] border-b border-[--color-vault-border] lg:hidden sticky top-0 z-30">
+            <div class="navbar bg-[--color-vault-sidebar]/90 backdrop-blur-md border-b border-[--color-vault-border] lg:hidden sticky top-0 z-30">
                 <div class="flex-none">
                     <label for="sidebar-toggle" class="btn btn-square btn-ghost drawer-button">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -40,8 +42,8 @@
                     </label>
                 </div>
                 <div class="flex-1">
-                    <a href="{{ route('games.index') }}" class="text-lg font-bold text-[--color-vault-accent]">
-                        🎮 GameVault
+                    <a href="{{ route('games.index') }}" class="flex items-center gap-2">
+                        <img src="{{ asset('Logo GameVault.png') }}" alt="GameVault Logo" class="h-8 w-auto object-contain rounded-lg" />
                     </a>
                 </div>
             </div>
@@ -49,38 +51,38 @@
             {{-- Flash Messages --}}
             @if (session('success'))
                 <div class="px-4 pt-4 lg:px-8 lg:pt-6">
-                    <div role="alert" class="alert alert-success shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    <div role="alert" class="alert alert-success bg-emerald-950/80 border border-emerald-500/30 text-emerald-200 shadow-xl backdrop-blur-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-emerald-400 shrink-0 h-6 w-6" fill="none"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>{{ session('success') }}</span>
+                        <span class="font-medium">{{ session('success') }}</span>
                     </div>
                 </div>
             @endif
 
             @if (session('error'))
                 <div class="px-4 pt-4 lg:px-8 lg:pt-6">
-                    <div role="alert" class="alert alert-error shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    <div role="alert" class="alert alert-error bg-rose-950/80 border border-rose-500/30 text-rose-200 shadow-xl backdrop-blur-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-rose-400 shrink-0 h-6 w-6" fill="none"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>{{ session('error') }}</span>
+                        <span class="font-medium">{{ session('error') }}</span>
                     </div>
                 </div>
             @endif
 
             {{-- Page Content --}}
-            <main class="flex-1 p-4 lg:p-8">
+            <main class="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
                 @yield('content')
             </main>
 
             {{-- Footer --}}
-            <footer class="border-t border-[--color-vault-border] p-4 text-center text-sm text-[--color-vault-muted]">
-                <p>© {{ date('Y') }} GameVault — Your Personal Game Library</p>
+            <footer class="border-t border-[--color-vault-border] p-6 text-center text-xs tracking-wider uppercase text-[--color-vault-muted]">
+                <p>© {{ date('Y') }} GameVault — Precision Library Management</p>
             </footer>
         </div>
 
@@ -90,68 +92,73 @@
         <div class="drawer-side z-40">
             <label for="sidebar-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
             <aside
-                class="w-72 min-h-screen bg-[--color-vault-sidebar] border-r border-[--color-vault-border] flex flex-col">
+                class="w-72 min-h-screen bg-[--color-vault-sidebar]/95 backdrop-blur-xl border-r border-[--color-vault-border] flex flex-col justify-between">
 
-                {{-- Brand --}}
-                <div class="p-6 border-b border-[--color-vault-border]">
-                    <a href="{{ route('games.index') }}" class="flex items-center gap-3">
-                        <span class="text-3xl">🎮</span>
-                        <div>
-                            <h1 class="text-xl font-bold text-white">GameVault</h1>
-                            <p class="text-xs text-[--color-vault-muted]">Your Game Library</p>
-                        </div>
-                    </a>
+                <div>
+                    {{-- Brand --}}
+                    <div class="p-6 border-b border-[--color-vault-border]">
+                        <a href="{{ route('games.index') }}" class="flex items-center gap-3 group">
+                            <img src="{{ asset('Logo Icon.png') }}" alt="GameVault Logo" class="h-9 w-auto object-contain group-hover:scale-105 transition-transform" />
+                            <div>
+                                <h1 class="text-xl font-black tracking-wider text-white">GAMEVAULT</h1>
+                                <p class="text-[10px] font-mono tracking-widest text-[--color-vault-gold] uppercase">Vault Control v2.0</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    {{-- Navigation --}}
+                    <nav class="p-4 space-y-2">
+                        <p class="text-[10px] font-mono uppercase tracking-widest text-[--color-vault-muted] mb-3 px-3">
+                            Navigation
+                        </p>
+
+                        {{-- Dashboard / Games link --}}
+                        <a href="{{ route('games.index') }}"
+                            class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover-lift
+                            {{ request()->routeIs('games.index') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30' : 'text-[--color-vault-muted] hover:bg-white/5 hover:text-white' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
+                            Collection
+                        </a>
+
+                        {{-- Add Game link --}}
+                        <a href="{{ route('games.create') }}"
+                            class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover-lift
+                            {{ request()->routeIs('games.create') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30' : 'text-[--color-vault-muted] hover:bg-white/5 hover:text-white' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add New Game
+                        </a>
+                    </nav>
                 </div>
-
-                {{-- Navigation --}}
-                <nav class="flex-1 p-4 space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[--color-vault-muted] mb-3 px-3">
-                        Menu
-                    </p>
-
-                    {{-- Dashboard / Games link --}}
-                    <a href="{{ route('games.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                        {{ request()->routeIs('games.index') ? 'bg-[--color-vault-accent] text-white' : 'text-[--color-vault-muted] hover:bg-[--color-vault-card] hover:text-white' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                        Games
-                    </a>
-
-                    {{-- Add Game link --}}
-                    <a href="{{ route('games.create') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                        {{ request()->routeIs('games.create') ? 'bg-[--color-vault-accent] text-white' : 'text-[--color-vault-muted] hover:bg-[--color-vault-card] hover:text-white' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Game
-                    </a>
-                </nav>
 
                 {{-- User info + Logout --}}
                 @isset($authUser)
-                    <div class="p-4 border-t border-[--color-vault-border]">
-                        <div class="flex items-center gap-3 mb-3 px-2">
+                    <div class="p-4 m-3 rounded-2xl bg-white/[0.03] border border-[--color-vault-border]">
+                        <div class="flex items-center gap-3 mb-3 px-1">
                             <div
-                                class="w-9 h-9 rounded-full bg-[--color-vault-accent] flex items-center justify-center text-white font-bold text-sm">
+                                class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-amber-400 flex items-center justify-center text-white font-black text-sm shadow-md">
                                 {{ strtoupper(substr($authUser['email'], 0, 1)) }}
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-white truncate">{{ $authUser['email'] }}</p>
-                                <p class="text-xs text-[--color-vault-muted]">Logged in</p>
+                                <p class="text-xs font-bold text-white truncate">{{ $authUser['email'] }}</p>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span class="text-[10px] font-mono text-[--color-vault-muted] uppercase">Authenticated</span>
+                                </div>
                             </div>
                         </div>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit"
-                                class="btn btn-ghost btn-sm w-full justify-start gap-2 text-[--color-vault-muted] hover:text-red-400 hover:bg-red-400/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                class="btn btn-ghost btn-xs w-full justify-center gap-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-lg py-2 h-auto transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

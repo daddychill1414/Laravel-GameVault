@@ -10,15 +10,66 @@
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* GameVault custom color tokens */
-    --color-vault-dark: #0f0f1a;
-    --color-vault-card: #1a1a2e;
-    --color-vault-sidebar: #12121f;
-    --color-vault-border: #2a2a3e;
-    --color-vault-accent: #7c3aed;
-    --color-vault-accent-hover: #6d28d9;
-    --color-vault-text: #e2e8f0;
+    /* GameVault Preset B: Midnight Luxe Aesthetic Tokens */
+    --color-vault-dark: #0a0a10;
+    --color-vault-card: #13131e;
+    --color-vault-sidebar: #0e0e17;
+    --color-vault-border: rgba(255, 255, 255, 0.08);
+    --color-vault-accent: #8b5cf6;
+    --color-vault-accent-hover: #7c3aed;
+    --color-vault-gold: #c9a84c;
+    --color-vault-text: #f1f5f9;
     --color-vault-muted: #94a3b8;
+}
+
+/* Modern Ambient Animated Grid & Radial Glows */
+.bg-tech-grid {
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+
+.ambient-glow-1 {
+    position: fixed;
+    top: -10%;
+    left: -10%;
+    width: 45vw;
+    height: 45vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ambient-glow-2 {
+    position: fixed;
+    bottom: -10%;
+    right: -10%;
+    width: 50vw;
+    height: 50vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201, 168, 76, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Micro-interactions & Magnetic button lifts */
+.hover-lift {
+    transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.25s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 12px 30px -10px rgba(139, 92, 246, 0.25);
+}
+
+.glass-panel {
+    background: rgba(19, 19, 30, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-vault-border);
 }
 
 /* Custom scrollbar for the gaming aesthetic */

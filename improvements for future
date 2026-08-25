@@ -1,0 +1,36 @@
+🎨 1. Visual & UI/UX Enhancements
+📊 Hero Stats Bar (DaisyUI Stats Component)
+- Add a sleek top panel on the dashboard displaying:
+  - Total Games in Vault
+  - Estimated Collection Value ($)
+  - Backlog Completion % (Progress Bar / Radial Gauge)
+  - Currently Playing count
+
+🏷️ Color-Coded Platform & Status Badges
+- [x] Status pills (Playing 🟢, Completed 🏆, Backlog ⏳, Dropped 🔴) with custom glowing background states.
+- Platform tags (PC, PS5, Xbox Series X, Switch) with subtle icons and custom neon badge accents.
+
+✨ Glassmorphism & Hover Animations
+- [x] Preset B "Midnight Luxe" aesthetic tokens and global SVG noise overlay.
+- [x] Glassmorphic header & action bars (`glass-panel` backdrop-blur-md).
+- [x] Micro-interactions on game cards: hover lift (`translate-y-1` scale), subtle glow shadow, and smooth image cover zoom.
+- [x] Custom transparent branding logo (`Logo Icon.png`) with purple drop-shadow glow and centered alignment.
+- [x] Subtle ambient tech grid background (`bg-tech-grid`) and glowing radial ambient spots (`ambient-glow-1`, `ambient-glow-2`).
+
+🖼️ Interactive Empty & Loading States
+- [x] Custom empty state visual layout when a search query returns 0 results or when the user has 0 games, complete with a quick "Add Your First Game" CTA button.
+
+🚀 2. Feature & Functional Upgrades
+🔍 Advanced Filter & Sorting Toolbar
+- [x] Real-time search bar combined with drop-down filters for Status.
+- Multi-option sorting: Recently Added, Release Date, Rating, or Price (High to Low).
+
+⭐ 5-Star Ratings & Playtime Tracker
+- Add a personal star rating (1–5 stars) and a "Hours Played" tracker for each game.
+
+🎮 RAWG Game API Auto-fill (Auto Cover & Metadata)
+- When creating a game, type the title and auto-fetch official cover art, release date, developer, and genre from the free RAWG.io Game API with one click!
+
+📥 Vault Export (CSV / JSON)
+- A "Export Vault" button in settings/dashboard to download the entire personal collection for offline backups.
+
